@@ -1,0 +1,18 @@
+Package: DNApooling
+Type: Package
+Title: Estimate Family Contributions in Pooled DNA Using Genetic Algorithm
+Version: 0.1.0
+Authors@R: person("Bing", "Liang", email = "liangbing1983@hotmail.com", role = c("aut", "cre"))
+Description: A package to estimate parent and family contributions from pooled DNA data using DEoptim. Useful for aquaculture breeding programs.
+Depends: R (>= 4.0.0)
+Imports:
+    DEoptim,
+    ggplot2,
+    gaston,
+    dplyr
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.2
+URL: https://github.com/bingliang83/DNApooling
+BugReports: https://github.com/bingliang83/DNApooling/issues
