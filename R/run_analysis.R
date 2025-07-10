@@ -91,6 +91,8 @@ run_analysis <- function(geno_parents_file = NULL,
                                           trace = TRUE, F = F, CR = CR))
 
     best_v <- matrix(outDEoptim$optim$bestmem, ncol = np, nrow = nfam, byrow = TRUE)
+    colnames(best_v) <- "contrib"  # assign column name
+
     Yest <- M %*% best_v
 
     write.table(best_v, file.path(out_dir, paste0("ContribSolutionRepli", r, ".txt")),
@@ -102,13 +104,13 @@ run_analysis <- function(geno_parents_file = NULL,
 
     siresim_list[[r]] <- est_contrib %>%
       group_by(siresim) %>%
-      summarise(contrib_percent = sum(V1)) %>%
+      summarise(contrib_percent = sum(contrib), .groups = "drop") %>%
       rename(parent = siresim) %>%
       mutate(parent_type = 'sire', replicate = r)
 
     damsim_list[[r]] <- est_contrib %>%
       group_by(damsim) %>%
-      summarise(contrib_percent = sum(V1)) %>%
+      summarise(contrib_percent = sum(contrib), .groups = "drop") %>%
       rename(parent = damsim) %>%
       mutate(parent_type = 'dam', replicate = r)
 
