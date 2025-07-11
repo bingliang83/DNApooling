@@ -9,21 +9,28 @@
 ```r
 # Install from GitHub
 remotes::install_github("bingliang83/DNApooling")
-🧪 Usage
-🔹 Option 1: Run Example Analysis (with known parent sex)
-r
-Copy
-Edit
+```
+
+---
+
+## 🧪 Usage
+
+### 🔹 Option 1: Run Example Analysis (with known parent sex)
+
+```r
 library(DNApooling)
 run_analysis(use_example = TRUE)
+```
+
 This loads example input files bundled in the package and outputs results to the current working directory.
 
-🔹 Option 2: Run Analysis with Known Parent Sex
-Use run_analysis() if you have sex information for each parent (i.e., pheno_parents.txt includes a sex column).
+---
 
-r
-Copy
-Edit
+### 🔹 Option 2: Run Analysis with Known Parent Sex
+
+Use `run_analysis()` if your `pheno_parents.txt` file includes a `sex` column.
+
+```r
 run_analysis(
   geno_parents_file = "geno_parents.txt",
   pheno_parents_file = "pheno_parents.txt",
@@ -32,12 +39,15 @@ run_analysis(
   af_pool_file = "af_pool.txt",
   out_dir = "output"
 )
-🔹 Option 3: Run Analysis without Parent Sex Info
-Use run_analysis_unsexed() if you do not have sex information for each parent (i.e., pheno_parents.txt does not include or uses a placeholder for sex).
+```
 
-r
-Copy
-Edit
+---
+
+### 🔹 Option 3: Run Analysis Without Parent Sex Info
+
+Use `run_analysis_unsexed()` if your `pheno_parents.txt` file does **not** include a sex column or the sex information is unknown.
+
+```r
 run_analysis_unsexed(
   geno_parents_file = "geno_parents.txt",
   pheno_parents_file = "pheno_parents.txt",
@@ -46,64 +56,60 @@ run_analysis_unsexed(
   af_pool_file = "af_pool.txt",
   out_dir = "output"
 )
-📁 Input File Formats
-🧬 geno_parents.txt
-Matrix of SNP genotypes for parents
+```
 
-Row names: Parent IDs (e.g., id0023, id0024)
+---
 
-Column names: SNP IDs
+## 📁 Input File Formats
 
-Genotypes coded as 0, 1, or 2 (allele dosage)
+### 🧬 `geno_parents.txt`
+- SNP genotype matrix for parents
+- **Row names**: Parent IDs (e.g., `id0023`, `id0024`)
+- **Column names**: SNP IDs
+- Genotypes coded as `0`, `1`, or `2` (allele dosage)
 
-📋 pheno_parents.txt
-Parent metadata file
+### 📋 `pheno_parents.txt`
+- Metadata for parents
+- Required column:
+  - `ID`
+  - `sex` (1 = sire/male, 2 = dam/female) — *optional if using `run_analysis_unsexed()`*
 
-Required columns:
+### 🧬 `geno_off.txt`
+- SNP genotype matrix for offspring
+- **Row names**: Offspring IDs
+- **Columns**: SNPs (same order as in `geno_parents.txt`)
 
-ID
+### 📋 `pheno_off.txt`
+- Metadata for offspring
+- Required columns:
+  - `ID`
+  - `pool` (1 = included in DNA pool, 0 = excluded)
 
-sex (1 = sire/male, 2 = dam/female) — optional if using run_analysis_unsexed()
+### 📈 `af_pool.txt`
+- A matrix of observed allele frequencies from the pool
+- **One column**, **no header**
+- Each row corresponds to a SNP (same order as genotype files)
 
-🧬 geno_off.txt
-Matrix of SNP genotypes for offspring
+---
 
-Row names: Offspring IDs
+## 📤 Output Files
 
-Same SNPs (columns) and order as in geno_parents.txt
+Written to the specified `out_dir`:
 
-📋 pheno_off.txt
-Offspring metadata file
+- `ContribSolutionRepliX.txt`: Estimated family contributions (replicate X)
+- `AlleleFreqSolutionRepliX.txt`: Estimated allele frequencies (replicate X)
+- `est_parent_contrib_final_all.csv`: Combined parent-level contributions
+- `result.txt`: DEoptim summary including parameters and convergence info
 
-Required columns:
+---
 
-ID
+## 📚 Function Documentation
 
-pool (1 = included in DNA pool, 0 = excluded)
+### `run_analysis()`
 
-📈 af_pool.txt
-A numeric matrix with observed allele frequencies in the pooled sample
+Use when `pheno_parents.txt` includes a `sex` column.
 
-One column, no header
-
-Each row corresponds to a SNP (same order as genotype files)
-
-📤 Output Files
-The following files are written to the specified out_dir:
-
-ContribSolutionRepliX.txt: Estimated family contributions for replicate X
-
-AlleleFreqSolutionRepliX.txt: Estimated allele frequencies for replicate X
-
-est_parent_contrib_final_all.csv: Combined parental contributions across replicates
-
-result.txt: Summary table with DEoptim parameters and convergence info
-
-📚 Function Documentation
-run_analysis()
-r
-Copy
-Edit
+```r
 run_analysis(
   geno_parents_file,
   pheno_parents_file,
@@ -116,12 +122,15 @@ run_analysis(
   popsize_factor = 10,
   use_example = FALSE
 )
-Use this function if you have sex column in pheno_parents.txt. Parent combinations will be formed as sire × dam.
+```
 
-run_analysis_unsexed()
-r
-Copy
-Edit
+---
+
+### `run_analysis_unsexed()`
+
+Use when `pheno_parents.txt` does **not** include sex info. Assumes any × any parent combinations.
+
+```r
 run_analysis_unsexed(
   geno_parents_file,
   pheno_parents_file,
@@ -133,12 +142,20 @@ run_analysis_unsexed(
   nrep = 5,
   popsize_factor = 10
 )
-Use this function if you do not have sex info. It assumes any × any parent combination.
+```
 
-🔍 Example Input Files
-To inspect the example input formats, visit:
+---
 
-📁 inst/extdata/
+## 🔍 Example Input Files
 
-📬 Support
-If you encounter issues or have suggestions, please open a GitHub Issue.
+To inspect example input formats, check:
+
+```
+inst/extdata/
+```
+
+---
+
+## 📬 Support
+
+If you encounter any issues or have suggestions, please [open a GitHub Issue](https://github.com/bingliang83/DNApooling/issues).
