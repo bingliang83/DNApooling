@@ -1,22 +1,32 @@
-#' Run Family Contribution Analysis
+#' Estimate parental contributions using parental genotypes without known sex
 #'
-#' This function reads genomic and phenotypic input files, runs DEoptim optimization,
-#' and saves results including allele frequencies and parent contributions.
+#' This function estimates parental contributions when the sex of the parents is unknown. It sums contributions across all combinations
+#' of candidate sires and dams and merges them by parent ID.
 #'
-#' @param geno_parents_file Path to geno_parents.txt
-#' @param pheno_parents_file Path to pheno_parents.txt
-#' @param geno_off_file Path to geno_off.txt
-#' @param pheno_off_file Path to pheno_off.txt
-#' @param af_pool_file Path to af_pool.txt
-#' @param out_dir Directory to save result files (default: current directory)
-#' @param maxgen Maximum number of generations (default: 100000)
-#' @param nrep Number of replicates (default: 5)
-#' @param popsize_factor Multiplier to determine population size (default: 10)
-#' @param use_example If TRUE, use example data from inst/extdata/ (default: FALSE)
+#' @param geno_parents_file Path to the parental genotype file (row names = parent IDs, column names = SNP IDs).
+#' @param geno_off_file Path to the offspring genotype file (same SNPs and order as in parent file).
+#' @param pheno_off_file Path to offspring metadata file, must include `ID` and `pool` columns.
+#' @param af_pool_file Path to observed allele frequency file (single column, no header).
+#' @param out_dir Output directory to save result files (default = ".").
+#' @param maxgen Maximum number of generations for DEoptim (default = 100000).
+#' @param nrep Number of replicates to run (default = 5).
+#' @param popsize_factor Multiplier for DEoptim population size (default = 10).
+#' @param use_example Logical. If TRUE, use built-in example files.
 #'
-#' @return Saves result files to out_dir
+#' @return Saves output files to the `out_dir` directory, including estimated allele frequencies and combined parent contributions.
 #' @export
-run_analysis <- function(geno_parents_file = NULL,
+#'
+#' @examples
+#' # Example using user input
+#' run_analysis_unsexed(
+#'   geno_parents_file = "geno_parents.txt",
+#'   geno_off_file = "geno_off.txt",
+#'   pheno_off_file = "pheno_off.txt",
+#'   af_pool_file = "af_pool.txt",
+#'   out_dir = "output"
+#' )
+
+run_analysis_unsexed <- function(geno_parents_file = NULL,
                          pheno_parents_file = NULL,
                          geno_off_file = NULL,
                          pheno_off_file = NULL,

@@ -2,43 +2,60 @@
 % Please edit documentation in R/run_analysis.R
 \name{run_analysis}
 \alias{run_analysis}
-\title{Run Family Contribution Analysis}
+\title{Estimate parental contributions using known-sex parental genotypes}
 \usage{
 run_analysis(
-  geno_parents_file,
-  pheno_parents_file,
-  geno_off_file,
-  pheno_off_file,
-  af_pool_file,
+  geno_parents_file = NULL,
+  pheno_parents_file = NULL,
+  geno_off_file = NULL,
+  pheno_off_file = NULL,
+  af_pool_file = NULL,
   out_dir = ".",
   maxgen = 1e+05,
   nrep = 5,
-  popsize_factor = 10
+  popsize_factor = 10,
+  use_example = FALSE
 )
 }
 \arguments{
-\item{geno_parents_file}{Path to geno_parents.txt}
+\item{geno_parents_file}{Path to the parental genotype file (e.g., "geno_parents.txt").}
 
-\item{pheno_parents_file}{Path to pheno_parents.txt}
+\item{pheno_parents_file}{Path to the parental metadata file, must include columns `ID` and `sex` (1 = sire, 2 = dam).}
 
-\item{geno_off_file}{Path to geno_off.txt}
+\item{geno_off_file}{Path to the offspring genotype file (e.g., "geno_off.txt").}
 
-\item{pheno_off_file}{Path to pheno_off.txt}
+\item{pheno_off_file}{Path to the offspring metadata file, must include `ID` and `pool` columns.}
 
-\item{af_pool_file}{Path to af_pool.txt}
+\item{af_pool_file}{Path to the pooled allele frequency file (e.g., "af_pool.txt").}
 
-\item{out_dir}{Directory to save result files (default: current directory)}
+\item{out_dir}{Output directory to save result files. Default is the current directory.}
 
-\item{maxgen}{Maximum number of generations (default: 100000)}
+\item{maxgen}{Maximum number of generations for DEoptim (default = 100000).}
 
-\item{nrep}{Number of replicates (default: 5)}
+\item{nrep}{Number of replicates to run (default = 5).}
 
-\item{popsize_factor}{Multiplier to determine population size (default: 10)}
+\item{popsize_factor}{Multiplier to determine DEoptim population size (default = 10).}
+
+\item{use_example}{Logical. If TRUE, run the analysis with example data included in the package (default = FALSE).}
 }
 \value{
-Saves result files to out_dir
+Saves output files to the specified `out_dir`, including contribution estimates and diagnostic summaries.
 }
 \description{
-This function reads genomic and phenotypic input files, runs DEoptim optimization,
-and saves results including allele frequencies and parent contributions.
+This function estimates family contributions to pooled offspring genotypes using SNP data from known-sex parent samples.
+Differential evolution is used to optimize parental combinations based on allele frequency in the pool.
+}
+\examples{
+# Run example data included in package
+run_analysis(use_example = TRUE)
+
+# Run analysis with user data
+run_analysis(
+  geno_parents_file = "geno_parents.txt",
+  pheno_parents_file = "pheno_parents.txt",
+  geno_off_file = "geno_off.txt",
+  pheno_off_file = "pheno_off.txt",
+  af_pool_file = "af_pool.txt",
+  out_dir = "output"
+)
 }
