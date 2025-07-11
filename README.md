@@ -15,12 +15,18 @@ remotes::install_github("bingliang83/DNApooling")
 
 ## 🧪 Usage
 
-### 🔹 Option 1: Run Example Analysis (with known parent sex)
+### 🔹 Option 1: Run Example Analysis (with or without known parent sex)
 
 ```r
 library(DNApooling)
 run_analysis(use_example = TRUE)
 ```
+
+```r
+library(DNApooling)
+run_analysis_unsexed(use_example = TRUE)
+```
+
 
 This loads example input files bundled in the package and outputs results to the current working directory.
 
@@ -62,6 +68,17 @@ run_analysis_unsexed(
 
 ## 📁 Input File Formats
 
+Before running the analysis, make sure your input files are accessible by R. You can:
+
+- Place the files in your **current working directory** (check with `getwd()` in R), or  
+- Provide **relative or absolute paths** to the input files when calling the function.
+
+For example:
+
+```r
+geno_parents_file = "data/geno_parents.txt"        # relative path
+geno_parents_file = "/home/user/files/geno_parents.txt"  # absolute path
+
 ### 🧬 `geno_parents.txt`
 - SNP genotype matrix for parents
 - **Row names**: Parent IDs (e.g., `id0023`, `id0024`)
@@ -94,12 +111,22 @@ run_analysis_unsexed(
 
 ## 📤 Output Files
 
-Written to the specified `out_dir`:
+All output files are written to the directory specified by the `out_dir` parameter. By default, this is the current working directory (`out_dir = "."`). You can set a custom output folder:
+
+```r
+run_analysis(..., out_dir = "output")
+
+If the directory does not exist, R will return an error. You can create it before running the analysis with:
+
+```r
+dir.create("output")
+
+### Output Includes:
 
 - `ContribSolutionRepliX.txt`: Estimated family contributions (replicate X)
 - `AlleleFreqSolutionRepliX.txt`: Estimated allele frequencies (replicate X)
-- `est_parent_contrib_final_all.csv`: Combined parent-level contributions
-- `result.txt`: DEoptim summary including parameters and convergence info
+- `est_parent_contrib_final_all.csv`: Combined parent-level contributions across replicates
+- `result.txt`: Summary of DEoptim parameters and convergence information
 
 ---
 
