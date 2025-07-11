@@ -78,6 +78,7 @@ For example:
 ```r
 geno_parents_file = "data/geno_parents.txt"        # relative path
 geno_parents_file = "/home/user/files/geno_parents.txt"  # absolute path
+```
 
 ### 🧬 `geno_parents.txt`
 - SNP genotype matrix for parents
@@ -115,11 +116,13 @@ All output files are written to the directory specified by the `out_dir` paramet
 
 ```r
 run_analysis(..., out_dir = "output")
+```
 
 If the directory does not exist, R will return an error. You can create it before running the analysis with:
 
 ```r
 dir.create("output")
+```
 
 ### Output Includes:
 
