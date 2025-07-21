@@ -5,7 +5,6 @@
 #'
 #' @param geno_parents_file Path to the parental genotype file (e.g., "geno_parents.txt").
 #' @param pheno_parents_file Path to the parental metadata file, must include columns `ID` and `sex` (1 = sire, 2 = dam).
-#' @param geno_off_file Path to the offspring genotype file (e.g., "geno_off.txt").
 #' @param pheno_off_file Path to the offspring metadata file, must include `ID` and `pool` columns.
 #' @param af_pool_file Path to the pooled allele frequency file (e.g., "af_pool.txt").
 #' @param out_dir Output directory to save result files. Default is the current directory.
@@ -25,7 +24,6 @@
 #' run_analysis(
 #'   geno_parents_file = "geno_parents.txt",
 #'   pheno_parents_file = "pheno_parents.txt",
-#'   geno_off_file = "geno_off.txt",
 #'   pheno_off_file = "pheno_off.txt",
 #'   af_pool_file = "af_pool.txt",
 #'   out_dir = "output"
@@ -33,7 +31,6 @@
 
 run_analysis <- function(geno_parents_file = NULL,
                          pheno_parents_file = NULL,
-                         geno_off_file = NULL,
                          pheno_off_file = NULL,
                          af_pool_file = NULL,
                          out_dir = ".",
@@ -51,20 +48,18 @@ run_analysis <- function(geno_parents_file = NULL,
   if (use_example) {
     geno_parents_file <- system.file("extdata", "geno_parents.txt", package = "DNApooling")
     pheno_parents_file <- system.file("extdata", "pheno_parents.txt", package = "DNApooling")
-    geno_off_file      <- system.file("extdata", "geno_off.txt", package = "DNApooling")
     pheno_off_file     <- system.file("extdata", "pheno_off.txt", package = "DNApooling")
     af_pool_file       <- system.file("extdata", "af_pool.txt", package = "DNApooling")
   }
 
   # Validate paths
-  if (any(sapply(list(geno_parents_file, pheno_parents_file, geno_off_file, pheno_off_file, af_pool_file), is.null))) {
+  if (any(sapply(list(geno_parents_file, pheno_parents_file, pheno_off_file, af_pool_file), is.null))) {
     stop("Missing one or more input file paths. Set use_example = TRUE to use built-in example files.")
   }
 
   # Read input files
   geno_parents <- read.table(geno_parents_file, stringsAsFactors = FALSE)
   pheno_parents <- read.table(pheno_parents_file, header = TRUE)
-  geno_off <- read.table(geno_off_file, stringsAsFactors = FALSE)
   pheno_off <- read.table(pheno_off_file, header = TRUE, stringsAsFactors = FALSE)
   Mpool <- as.matrix(read.table(af_pool_file, header = FALSE))
 
@@ -106,7 +101,7 @@ run_analysis <- function(geno_parents_file = NULL,
                                           trace = TRUE, F = F, CR = CR))
 
     best_v <- matrix(outDEoptim$optim$bestmem, ncol = np, nrow = nfam, byrow = TRUE)
-    colnames(best_v) <- "contrib"  # assign column name
+    colnames(best_v) <- "contrib"
 
     Yest <- M %*% best_v
 

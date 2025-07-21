@@ -1,41 +1,12 @@
-#' Estimate parental contributions using parental genotypes without known sex
-#'
-#' This function estimates parental contributions when the sex of the parents is unknown. It sums contributions across all combinations
-#' of candidate sires and dams and merges them by parent ID.
-#'
-#' @param geno_parents_file Path to the parental genotype file (row names = parent IDs, column names = SNP IDs).
-#' @param geno_off_file Path to the offspring genotype file (same SNPs and order as in parent file).
-#' @param pheno_off_file Path to offspring metadata file, must include `ID` and `pool` columns.
-#' @param af_pool_file Path to observed allele frequency file (single column, no header).
-#' @param out_dir Output directory to save result files (default = ".").
-#' @param maxgen Maximum number of generations for DEoptim (default = 100000).
-#' @param nrep Number of replicates to run (default = 5).
-#' @param popsize_factor Multiplier for DEoptim population size (default = 10).
-#' @param use_example Logical. If TRUE, use built-in example files.
-#'
-#' @return Saves output files to the `out_dir` directory, including estimated allele frequencies and combined parent contributions.
-#' @export
-#'
-#' @examples
-#' # Example using user input
-#' run_analysis_unsexed(
-#'   geno_parents_file = "geno_parents.txt",
-#'   geno_off_file = "geno_off.txt",
-#'   pheno_off_file = "pheno_off.txt",
-#'   af_pool_file = "af_pool.txt",
-#'   out_dir = "output"
-#' )
-
 run_analysis_unsexed <- function(geno_parents_file = NULL,
-                         pheno_parents_file = NULL,
-                         geno_off_file = NULL,
-                         pheno_off_file = NULL,
-                         af_pool_file = NULL,
-                         out_dir = ".",
-                         maxgen = 100000,
-                         nrep = 5,
-                         popsize_factor = 10,
-                         use_example = FALSE) {
+                                 pheno_parents_file = NULL,
+                                 pheno_off_file = NULL,
+                                 af_pool_file = NULL,
+                                 out_dir = ".",
+                                 maxgen = 100000,
+                                 nrep = 5,
+                                 popsize_factor = 10,
+                                 use_example = FALSE) {
 
   library(DEoptim)
   library(ggplot2)
@@ -46,20 +17,18 @@ run_analysis_unsexed <- function(geno_parents_file = NULL,
   if (use_example) {
     geno_parents_file <- system.file("extdata", "geno_parents.txt", package = "DNApooling")
     pheno_parents_file <- system.file("extdata", "pheno_parents.txt", package = "DNApooling")
-    geno_off_file      <- system.file("extdata", "geno_off.txt", package = "DNApooling")
     pheno_off_file     <- system.file("extdata", "pheno_off.txt", package = "DNApooling")
     af_pool_file       <- system.file("extdata", "af_pool.txt", package = "DNApooling")
   }
 
   # Validate paths
-  if (any(sapply(list(geno_parents_file, pheno_parents_file, geno_off_file, pheno_off_file, af_pool_file), is.null))) {
+  if (any(sapply(list(geno_parents_file, pheno_parents_file, pheno_off_file, af_pool_file), is.null))) {
     stop("Missing one or more input file paths. Set use_example = TRUE to use built-in example files.")
   }
 
   # Read input files
   geno_parents <- read.table(geno_parents_file, stringsAsFactors = FALSE)
   pheno_parents <- read.table(pheno_parents_file, header = TRUE)
-  geno_off <- read.table(geno_off_file, stringsAsFactors = FALSE)
   pheno_off <- read.table(pheno_off_file, header = TRUE, stringsAsFactors = FALSE)
   Mpool <- as.matrix(read.table(af_pool_file, header = FALSE))
 
@@ -67,33 +36,19 @@ run_analysis_unsexed <- function(geno_parents_file = NULL,
   np <- 1
   sample_perpool <- sum(pheno_off$pool == 1)
 
-  #create all possible combinations among the parents and use all of them as possible families
+  # Generate all possible parent combinations
   ids <- pheno_parents$id
   combinations <- combn(ids, 2)
   combinations_df <- as.data.frame(t(combinations))
-  families_all <- combinations_df
-  families_all <- families_all %>%
-    rename(siresim=V1,damsim=V2)
-  nfam <- length(families_all$siresim)
-  M <- matrix(c(0),ncol=nfam,nrow=nsnps)
+  families_all <- combinations_df %>%
+    rename(siresim = V1, damsim = V2)
+  nfam <- nrow(families_all)
+  M <- matrix(0, ncol = nfam, nrow = nsnps)
 
-  for(i in 1:nfam)
-  {
-    gen1 <- geno_parents[which(rownames(geno_parents)==families_all$siresim[i]),]
-    gen2 <- geno_parents[which(rownames(geno_parents)==families_all$damsim[i]),]
-
-    d <- 1
-
-    while(d <= nsnps)
-    {
-
-      M[d,i] <- sum(gen1[d],gen2[d])/4 #e.g. for family 1 snp 1, the allele frequency is
-      #(V1[1] + V2[1])/ 4 = 0.25
-
-      d <- d + 1
-    }
-    d <- 1
-
+  for(i in 1:nfam) {
+    gen1 <- geno_parents[rownames(geno_parents) == families_all$siresim[i], ]
+    gen2 <- geno_parents[rownames(geno_parents) == families_all$damsim[i], ]
+    M[, i] <- (as.numeric(gen1) + as.numeric(gen2)) / 4
   }
 
   F <- 0.8
@@ -117,7 +72,7 @@ run_analysis_unsexed <- function(geno_parents_file = NULL,
                                           trace = TRUE, F = F, CR = CR))
 
     best_v <- matrix(outDEoptim$optim$bestmem, ncol = np, nrow = nfam, byrow = TRUE)
-    colnames(best_v) <- "contrib"  # assign column name
+    colnames(best_v) <- "contrib"
 
     Yest <- M %*% best_v
 
@@ -140,7 +95,8 @@ run_analysis_unsexed <- function(geno_parents_file = NULL,
       rename(parent = damsim) %>%
       mutate(parent_type = 'dam', replicate = r)
 
-    est_parent_contrib_final[[r]] <- rbind(siresim_list[[r]], damsim_list[[r]]) %>% group_by(parent) %>%
+    est_parent_contrib_final[[r]] <- rbind(siresim_list[[r]], damsim_list[[r]]) %>%
+      group_by(parent) %>%
       summarise(contrib_percent = sum(contrib_percent), .groups = "drop") %>%
       arrange(parent)
 

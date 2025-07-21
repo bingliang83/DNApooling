@@ -40,7 +40,6 @@ Use `run_analysis()` if your `pheno_parents.txt` file includes a `sex` column.
 run_analysis(
   geno_parents_file = "geno_parents.txt",
   pheno_parents_file = "pheno_parents.txt",
-  geno_off_file = "geno_off.txt",
   pheno_off_file = "pheno_off.txt",
   af_pool_file = "af_pool.txt",
   out_dir = "output"
@@ -57,7 +56,6 @@ Use `run_analysis_unsexed()` if your `pheno_parents.txt` file does **not** inclu
 run_analysis_unsexed(
   geno_parents_file = "geno_parents.txt",
   pheno_parents_file = "pheno_parents.txt",
-  geno_off_file = "geno_off.txt",
   pheno_off_file = "pheno_off.txt",
   af_pool_file = "af_pool.txt",
   out_dir = "output"
@@ -87,24 +85,19 @@ geno_parents_file = "/home/user/files/geno_parents.txt"  # absolute path
 - Genotypes coded as `0`, `1`, or `2` (allele dosage)
 
 ### 📋 `pheno_parents.txt`
-- Metadata for parents
+- Metadata for parents to provide information on parents ID (compulsory) and sex (optional)
 - Required column:
   - `ID`
   - `sex` (1 = sire/male, 2 = dam/female) — *optional if using `run_analysis_unsexed()`*
 
-### 🧬 `geno_off.txt`
-- SNP genotype matrix for offspring
-- **Row names**: Offspring IDs
-- **Columns**: SNPs (same order as in `geno_parents.txt`)
-
 ### 📋 `pheno_off.txt`
-- Metadata for offspring
+- Metadata for offspring to indicate sample ID and whether they were included in the pool
 - Required columns:
   - `ID`
   - `pool` (1 = included in DNA pool, 0 = excluded)
 
 ### 📈 `af_pool.txt`
-- A matrix of observed allele frequencies from the pool
+- A matrix of observed allele frequencies from the pool (generated based on quantitative genotyping outcome of pooled offspring samples)
 - **One column**, **no header**
 - Each row corresponds to a SNP (same order as genotype files)
 
@@ -143,7 +136,6 @@ Use when `pheno_parents.txt` includes a `sex` column.
 run_analysis(
   geno_parents_file,
   pheno_parents_file,
-  geno_off_file,
   pheno_off_file,
   af_pool_file,
   out_dir = ".",
@@ -164,7 +156,6 @@ Use when `pheno_parents.txt` does **not** include sex info. Assumes any × any p
 run_analysis_unsexed(
   geno_parents_file,
   pheno_parents_file,
-  geno_off_file,
   pheno_off_file,
   af_pool_file,
   out_dir = ".",
