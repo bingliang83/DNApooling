@@ -64,7 +64,7 @@ run_analysis_unsexed(
 
 ---
 
-## 📁 Input File Formats
+## 📁 Input File Descriptions
 
 Before running the analysis, make sure your input files are accessible by R. You can:
 
@@ -80,26 +80,43 @@ geno_parents_file = "/home/user/files/geno_parents.txt"  # absolute path
 
 ### 🧬 `geno_parents.txt`
 - SNP genotype matrix for parents
-- **Row names**: Parent IDs (e.g., `id0023`, `id0024`)
-- **Column names**: SNP IDs
-- Genotypes coded as `0`, `1`, or `2` (allele dosage)
+- **Rows**: Parent IDs (e.g., `id0023`, `id0024`)
+- **Columns**: SNP IDs
+- Genotypes must be coded as `0`, `1`, or `2` (allele dosage)
+
+---
 
 ### 📋 `pheno_parents.txt`
-- Metadata for parents to provide information on parents ID (compulsory) and sex (optional)
-- Required column:
-  - `ID`
-  - `sex` (1 = sire/male, 2 = dam/female) — *optional if using `run_analysis_unsexed()`*
+- Metadata for parental individuals
+- **Required column**:
+  - `ID`: Unique parent identifier (must match `geno_parents.txt`)
+- **Optional column**:
+  - `sex`: Biological sex of parent (`1` = sire/male, `2` = dam/female)
+    - Required only when using `run_analysis()`
+    - Not needed for `run_analysis_unsexed()`
+- *Note: The column must be explicitly named `sex` if included.*
 
-### 📋 `pheno_off.txt`
-- Metadata for offspring to indicate sample ID and whether they were included in the pool
-- Required columns:
-  - `ID`
-  - `pool` (1 = included in DNA pool, 0 = excluded)
+---
+
+### 🧒 `pheno_off.txt`
+- Metadata for offspring used in DNA pooling
+- **Required columns**:
+  - `ID`: Unique offspring identifier
+  - `pool`: Pooling status (`1` = included in pool, `0` = excluded)
+- *Note: This file must contain a column named `pool` for correct processing.*
+
+---
 
 ### 📈 `af_pool.txt`
-- A matrix of observed allele frequencies from the pool (generated based on quantitative genotyping outcome of pooled offspring samples)
-- **One column**, **no header**
-- Each row corresponds to a SNP (same order as genotype files)
+- Observed allele frequencies from pooled offspring
+- Derived from quantitative genotyping of the DNA pool
+- **Format**:
+  - Single column
+  - **No header**
+  - Each row represents a SNP
+  - SNPs must be in the same order as in `geno_parents.txt`
+
+
 
 ---
 
