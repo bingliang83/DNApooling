@@ -1,6 +1,29 @@
 # DNApooling
 
-**DNApooling** is an R package for estimating parental contributions to DNA pools using SNP genotype data. It applies differential evolution optimization to infer family proportions from allele frequencies observed in pooled offspring samples. This is particularly useful for aquaculture and livestock breeding programs where parentage is unknown but genotype information is available.
+**DNApooling** is an R package for estimating parental contributions to DNA pools using SNP genotype data. It applies **Differential Evolution (DE)** optimization to infer family proportions based on allele frequencies observed in pooled offspring samples.
+
+This method is especially useful for **mass-spawning species**, where tracking individual mating pairs is often impractical. DNApooling enables researchers and breeders to analyze pooled DNA data efficiently, even without prior knowledge of parental sex. However, including sex information can improve speed and accuracy, particularly in large spawning populations.
+
+## Key Features
+
+- Estimates relative parental contributions in pooled samples.
+- Compatible with datasets with or without known parental sex.
+- Uses observed allele frequencies and parent genotypes as input.
+
+## Applications
+
+DNApooling is particularly beneficial in breeding programs and genetic studies involving mass-spawning aquatic species. Potential use cases include:
+
+- **Progeny testing** without individual tagging.
+- **Investigating spawning patterns** and contributions in mass spawning events.
+- **Estimating genetic diversity** within pooled offspring samples.
+- Supporting **broodstock management** and **selective breeding** decisions.
+
+## Requirements
+
+- Genotype data for all candidate parents.
+- Allele frequency data from pooled offspring.
+- Optional: sex information for each parent.
 
 ---
 
