@@ -6,24 +6,25 @@ This method is especially useful for **mass-spawning species**, where tracking i
 
 ## Key Features
 
-- Estimates relative parental contributions in pooled samples.
-- Compatible with datasets with or without known parental sex.
-- Uses observed allele frequencies and parent genotypes as input.
+* Estimates relative parental contributions in pooled samples.
+* Compatible with datasets with or without known parental sex.
+* Uses observed allele frequencies and parent genotypes as input.
+* Allows optional tuning of **Differential Evolution parameters (`F` and `CR`)** for optimization.
 
 ## Applications
 
 DNApooling is particularly beneficial in breeding programs and genetic studies involving mass-spawning aquatic species. Potential use cases include:
 
-- **Progeny testing** without individual tagging.
-- **Investigating spawning patterns** and contributions in mass spawning events.
-- **Estimating genetic diversity** within pooled offspring samples.
-- Supporting **broodstock management** and **selective breeding** decisions.
+* **Progeny testing** without individual tagging.
+* **Investigating spawning patterns** and contributions in mass spawning events.
+* **Estimating genetic diversity** within pooled offspring samples.
+* Supporting **broodstock management** and **selective breeding** decisions.
 
 ## Requirements
 
-- Genotype data for all candidate parents.
-- Allele frequency data from pooled offspring.
-- Optional: sex information for each parent.
+* Genotype data for all candidate parents.
+* Allele frequency data from pooled offspring.
+* Optional: sex information for each parent.
 
 ---
 
@@ -49,7 +50,6 @@ run_analysis(use_example = TRUE)
 library(DNApooling)
 run_analysis_unsexed(use_example = TRUE)
 ```
-
 
 This loads example input files bundled in the package and outputs results to the current working directory.
 
@@ -87,82 +87,175 @@ run_analysis_unsexed(
 
 ---
 
+## ⚙️ Optional: Adjust Differential Evolution Parameters
+
+DNApooling uses **Differential Evolution optimization** via the `DEoptim` package.
+Advanced users may optionally modify the algorithm parameters:
+
+* **F** – mutation factor
+* **CR** – crossover probability
+
+Default values used in the package:
+
+```
+F = 0.8
+CR = 0.5
+```
+
+Users can override these values when calling the functions.
+
+### Example
+
+```r
+run_analysis(
+  geno_parents_file = "geno_parents.txt",
+  pheno_parents_file = "pheno_parents.txt",
+  pheno_off_file = "pheno_off.txt",
+  af_pool_file = "af_pool.txt",
+  out_dir = "output",
+  F = 0.1,
+  CR = 0.9
+)
+```
+
+Similarly for unsexed analysis:
+
+```r
+run_analysis_unsexed(
+  geno_parents_file = "geno_parents.txt",
+  pheno_parents_file = "pheno_parents.txt",
+  pheno_off_file = "pheno_off.txt",
+  af_pool_file = "af_pool.txt",
+  out_dir = "output",
+  F = 0.1,
+  CR = 0.9
+)
+```
+
+If these parameters are not specified, the default values **F = 0.8** and **CR = 0.5** will be used.
+
+---
+
 ## 📁 Input File Descriptions
 
 Before running the analysis, make sure your input files are accessible by R. You can:
 
-- Place the files in your **current working directory** (check with `getwd()` in R), or  
-- Provide **relative or absolute paths** to the input files when calling the function.
+* Place the files in your **current working directory** (check with `getwd()` in R), or
+* Provide **relative or absolute paths** to the input files when calling the function.
 
-For example:
+Example:
 
 ```r
-geno_parents_file = "data/geno_parents.txt"        # relative path
-geno_parents_file = "/home/user/files/geno_parents.txt"  # absolute path
+geno_parents_file = "data/geno_parents.txt"
+geno_parents_file = "/home/user/files/geno_parents.txt"
 ```
 
+---
+
 ### 🧬 `geno_parents.txt`
-- SNP genotype matrix for parents
-- **Rows**: Parent IDs (e.g., `id0023`, `id0024`)
-- **Columns**: SNP IDs
-- Genotypes must be coded as `0`, `1`, or `2` (allele dosage)
+
+* SNP genotype matrix for parents
+* **Rows**: Parent IDs (e.g., `id0023`, `id0024`)
+* **Columns**: SNP IDs
+* Genotypes must be coded as `0`, `1`, or `2` (allele dosage)
 
 ---
 
 ### 📋 `pheno_parents.txt`
-- Metadata for parental individuals
-- **Required column**:
-  - `ID`: Unique parent identifier (must match `geno_parents.txt`)
-- **Optional column**:
-  - `sex`: Biological sex of parent (`1` = sire/male, `2` = dam/female)
-    - Required only when using `run_analysis()`
-    - Not needed for `run_analysis_unsexed()`
-- *Note: The column must be explicitly named `sex` if included.*
+
+Metadata for parental individuals.
+
+Required column:
+
+```
+ID
+```
+
+Optional column:
+
+```
+sex
+```
+
+Coding:
+
+```
+1 = sire (male)
+2 = dam (female)
+```
+
+Notes:
+
+* Required only when using `run_analysis()`
+* Not needed for `run_analysis_unsexed()`
+* Column must be explicitly named `sex` if included.
 
 ---
 
 ### 🧒 `pheno_off.txt`
-- Metadata for offspring used in DNA pooling
-- **Required columns**:
-  - `ID`: Unique offspring identifier
-  - `pool`: Pooling status (`1` = included in pool, `0` = excluded)
-- *Note: This file must contain a column named `pool` for correct processing.*
+
+Metadata for offspring used in DNA pooling.
+
+Required columns:
+
+```
+ID
+pool
+```
+
+Coding:
+
+```
+1 = included in pool
+0 = excluded
+```
 
 ---
 
 ### 📈 `af_pool.txt`
-- Observed allele frequencies from pooled offspring
-- Derived from quantitative genotyping of the DNA pool
-- **Format**:
-  - Single column
-  - **No header**
-  - Each row represents a SNP
-  - SNPs must be in the same order as in `geno_parents.txt`
 
+Observed allele frequencies from pooled offspring.
 
+Format:
+
+* Single column
+* **No header**
+* One row per SNP
+* SNP order must match `geno_parents.txt`
 
 ---
 
 ## 📤 Output Files
 
-All output files are written to the directory specified by the `out_dir` parameter. By default, this is the current working directory (`out_dir = "."`). You can set a custom output folder:
+All output files are written to the directory specified by the `out_dir` parameter. By default, this is the current working directory (`out_dir = "."`).
+
+Example:
 
 ```r
 run_analysis(..., out_dir = "output")
 ```
 
-If the directory does not exist, R will return an error. You can create it before running the analysis with:
+If the directory does not exist:
 
 ```r
 dir.create("output")
 ```
 
-### Output Includes:
+### Output Files
 
-- `ContribSolutionRepliX.txt`: Estimated family contributions (replicate X)
-- `AlleleFreqSolutionRepliX.txt`: Estimated allele frequencies (replicate X)
-- `est_parent_contrib_final_all.csv`: Combined parent-level contributions across replicates
-- `result.txt`: Summary of DEoptim parameters and convergence information
+```
+ContribSolutionRepliX.txt
+AlleleFreqSolutionRepliX.txt
+est_parent_contrib_final_all.csv
+result.txt
+```
+
+Descriptions:
+
+* **ContribSolutionRepliX.txt** – estimated family contributions for replicate X
+* **AlleleFreqSolutionRepliX.txt** – estimated allele frequencies for replicate X
+* **est_parent_contrib_final_all.csv** – combined parent-level contributions across replicates
+* **result.txt** – summary of optimization parameters and convergence information
 
 ---
 
@@ -182,6 +275,8 @@ run_analysis(
   maxgen = 100000,
   nrep = 5,
   popsize_factor = 10,
+  F = 0.8,
+  CR = 0.5,
   use_example = FALSE
 )
 ```
@@ -190,7 +285,7 @@ run_analysis(
 
 ### `run_analysis_unsexed()`
 
-Use when `pheno_parents.txt` does **not** include sex info. Assumes any × any parent combinations.
+Use when `pheno_parents.txt` does **not** include sex information.
 
 ```r
 run_analysis_unsexed(
@@ -201,7 +296,10 @@ run_analysis_unsexed(
   out_dir = ".",
   maxgen = 100000,
   nrep = 5,
-  popsize_factor = 10
+  popsize_factor = 10,
+  F = 0.8,
+  CR = 0.5,
+  use_example = FALSE
 )
 ```
 
@@ -209,7 +307,7 @@ run_analysis_unsexed(
 
 ## 🔍 Example Input Files
 
-To inspect example input formats, check:
+Example input files are included in the package:
 
 ```
 inst/extdata/
@@ -219,4 +317,6 @@ inst/extdata/
 
 ## 📬 Support
 
-If you encounter any issues or have suggestions, please [open a GitHub Issue](https://github.com/bingliang83/DNApooling/issues).
+If you encounter any issues or have suggestions, please open a GitHub Issue:
+
+https://github.com/bingliang83/DNApooling/issues
