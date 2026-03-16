@@ -37,6 +37,8 @@ run_analysis <- function(geno_parents_file = NULL,
                          maxgen = 100000,
                          nrep = 5,
                          popsize_factor = 10,
+                         F = 0.8,
+                         CR = 0.5,
                          use_example = FALSE) {
 
   library(DEoptim)
@@ -44,7 +46,6 @@ run_analysis <- function(geno_parents_file = NULL,
   library(gaston)
   library(dplyr)
 
-  # Use packaged example data if use_example = TRUE
   if (use_example) {
     geno_parents_file <- system.file("extdata", "geno_parents.txt", package = "DNApooling")
     pheno_parents_file <- system.file("extdata", "pheno_parents.txt", package = "DNApooling")
@@ -52,12 +53,10 @@ run_analysis <- function(geno_parents_file = NULL,
     af_pool_file       <- system.file("extdata", "af_pool.txt", package = "DNApooling")
   }
 
-  # Validate paths
   if (any(sapply(list(geno_parents_file, pheno_parents_file, pheno_off_file, af_pool_file), is.null))) {
     stop("Missing one or more input file paths. Set use_example = TRUE to use built-in example files.")
   }
 
-  # Read input files
   geno_parents <- read.table(geno_parents_file, stringsAsFactors = FALSE)
   pheno_parents <- read.table(pheno_parents_file, header = TRUE)
   pheno_off <- read.table(pheno_off_file, header = TRUE, stringsAsFactors = FALSE)
@@ -69,9 +68,11 @@ run_analysis <- function(geno_parents_file = NULL,
 
   dads <- pheno_parents[pheno_parents$sex == 1, 1]
   mums <- pheno_parents[pheno_parents$sex == 2, 1]
+
   nfam <- length(dads) * length(mums)
 
   families_all <- expand.grid(siresim = dads, damsim = mums)
+
   M <- matrix(0, ncol = nfam, nrow = nsnps)
 
   for(i in 1:nfam) {
@@ -80,8 +81,6 @@ run_analysis <- function(geno_parents_file = NULL,
     M[, i] <- (as.numeric(gen1) + as.numeric(gen2)) / 4
   }
 
-  F <- 0.8
-  CR <- 0.5
   popsize <- popsize_factor * nfam
 
   of <- function(x) {
@@ -96,18 +95,29 @@ run_analysis <- function(geno_parents_file = NULL,
   res_list <- list()
 
   for(r in 1:nrep) {
-    outDEoptim <- DEoptim(of, lower = rep(0, nfam*np), upper = rep(1, nfam*np),
-                          DEoptim.control(strategy = 1, VTR = 0.5, itermax = maxgen, NP = popsize,
-                                          trace = TRUE, F = F, CR = CR))
+
+    outDEoptim <- DEoptim(of,
+                          lower = rep(0, nfam*np),
+                          upper = rep(1, nfam*np),
+                          DEoptim.control(strategy = 1,
+                                          VTR = 0.5,
+                                          itermax = maxgen,
+                                          NP = popsize,
+                                          trace = TRUE,
+                                          F = F,
+                                          CR = CR))
 
     best_v <- matrix(outDEoptim$optim$bestmem, ncol = np, nrow = nfam, byrow = TRUE)
     colnames(best_v) <- "contrib"
 
     Yest <- M %*% best_v
 
-    write.table(best_v, file.path(out_dir, paste0("ContribSolutionRepli", r, ".txt")),
+    write.table(best_v,
+                file.path(out_dir, paste0("ContribSolutionRepli", r, ".txt")),
                 quote = FALSE, row.names = FALSE, col.names = FALSE)
-    write.table(Yest, file.path(out_dir, paste0("AlleleFreqSolutionRepli", r, ".txt")),
+
+    write.table(Yest,
+                file.path(out_dir, paste0("AlleleFreqSolutionRepli", r, ".txt")),
                 quote = FALSE, row.names = FALSE, col.names = FALSE)
 
     est_contrib <- cbind(families_all, best_v)
@@ -124,15 +134,28 @@ run_analysis <- function(geno_parents_file = NULL,
       rename(parent = damsim) %>%
       mutate(parent_type = 'dam', replicate = r)
 
-    est_parent_contrib_final[[r]] <- rbind(siresim_list[[r]], damsim_list[[r]]) %>% arrange(parent)
+    est_parent_contrib_final[[r]] <- rbind(siresim_list[[r]], damsim_list[[r]]) %>%
+      arrange(parent)
 
-    res_list[[r]] <- data.frame(replicate = r, pop = popsize, gen = maxgen,
-                                lastiter = min(which(outDEoptim$member$bestvalit == outDEoptim$optim$bestval)))
+    res_list[[r]] <- data.frame(
+      replicate = r,
+      pop = popsize,
+      gen = maxgen,
+      lastiter = min(which(outDEoptim$member$bestvalit == outDEoptim$optim$bestval))
+    )
   }
 
   combined_contrib <- do.call(rbind, est_parent_contrib_final)
-  write.csv(combined_contrib, file.path(out_dir, "est_parent_contrib_final_all.csv"), row.names = FALSE)
+
+  write.csv(combined_contrib,
+            file.path(out_dir, "est_parent_contrib_final_all.csv"),
+            row.names = FALSE)
 
   combined_res <- do.call(rbind, res_list)
-  write.table(combined_res, file.path(out_dir, "result.txt"), quote = FALSE, row.names = FALSE, col.names = TRUE)
+
+  write.table(combined_res,
+              file.path(out_dir, "result.txt"),
+              quote = FALSE,
+              row.names = FALSE,
+              col.names = TRUE)
 }
