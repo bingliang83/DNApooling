@@ -10,6 +10,8 @@ run_analysis_unsexed <- function(geno_parents_file = NULL,
                                  CR = 0.5,
                                  use_example = FALSE) {
 
+  if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
+
   library(DEoptim)
   library(ggplot2)
   library(gaston)
